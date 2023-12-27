@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ideal BSA Calculator</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .ideal-bsa {
+            font-size: 24px;
+            background-color: #0aa305a9;
+            padding: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <body>
+        <h1>Ideal BSA Calculator</h1>
+        <label for="unit-system">Select Unit System:</label>
+        <select id="unit-system">
+            <option value="metric">Metric (cm, kg)</option>
+            <option value="imperial">Imperial (in, lbs)</option>
+        </select><br><br>
+    
+        <form>
+            <label for="height">Height:</label>
+            <input type="number" id="height" name="height" required>
+            <span id="height-unit-label">cm</span><br><br>
+    
+            <label for="weight">Weight:</label>
+            <input type="number" id="weight" name="weight" required>
+            <span id="weight-unit-label">kg</span><br><br>
+    
+            <button type="button" id="calculate">Calculate</button>
+        </form>
+
+    <div id="results">
+        <h2>Results</h2>
+        <div id="bsa-haycock"></div>
+        <div id="bsa-mosteller"></div>
+        <div id="bsa-dubois"></div>
+        <div id="bmi"></div>
+        <div id="ideal-bsa" class="ideal-bsa"></div>
+        <div id="wt-bmi25"></div>
+    </div>
+
+    <script>
+$(document).ready(function() {
+    $('.ideal-bsa').hide();
+    function calculateBSA() {
+        var height, weight, weightUnit;
+
+        if ($('#unit-system').val() === 'metric') {
+            height = parseFloat($('#height').val());
+            weight = parseFloat($('#weight').val());
+            weightUnit = 'kg';
+        } else { // Convert imperial to metric
+            height = parseFloat($('#height').val()) * 2.54; // inches to cm
+            weight = parseFloat($('#weight').val()) * 0.453592; // lbs to kg
+            weightUnit = 'lbs';
+        }
+
+        // Calculate BSA by Haycock formula
+        var bsaHaycock = Math.sqrt((height * weight) / 3600);
+        $('#bsa-haycock').text('BSA (Haycock): ' + bsaHaycock.toFixed(2) + ' m²');
+
+        // Calculate BSA by Mosteller formula
+        var bsaMosteller = Math.sqrt((height * weight) / 3600);
+        $('#bsa-mosteller').text('BSA (Mosteller): ' + bsaMosteller.toFixed(2) + ' cm²');
+
+        // Calculate BSA by DuBois formula
+        var bsaDubois = 0.007184 * Math.pow(height, 0.725) * Math.pow(weight, 0.425);
+        $('#bsa-dubois').text('BSA (DuBois): ' + bsaDubois.toFixed(2) + ' m²');
+
+        // Calculate BMI
+        var bmi = weight / ((height / 100) * (height / 100));
+        $('#bmi').text('BMI: ' + bmi.toFixed(2));
+        $('.ideal-bsa').show();
+        if (bmi < 25) {
+            $('#ideal-bsa').text('BSA: '+bsaMosteller.toFixed(2) + ' cm² ');
+            $('#wt-bmi25').text('Since the BMI is not greater than 25, the BSA is already "idealized"');
+        } else {
+            var wtBmi25 = (25 * ((height / 100) * (height / 100)));
+            var idealBsa = Math.sqrt((height * wtBmi25) / 3600);
+
+            // Displaying calculations
+            $('#ideal-bsa').text('Ideal BSA: ' + idealBsa.toFixed(2) + ' m²');
+            //make sure the wt-BMI25 is in correct units
+            var displayCorrectedWt;
+            if (weightUnit === 'lbs'){
+                displayCorrectedWt = wtBmi25 * 2.205;
+            } else {
+                displayCorrectedWt = wtBmi25;
+            }
+            $('#wt-bmi25').text('the weight at this ideal BSA is: ' + displayCorrectedWt.toFixed(1) + ' '+ weightUnit  );
+        }
+
+    }
+
+    function isValidNumber(value) {
+        return !isNaN(value) && value !== '';
+    }
+    
+    $('#unit-system').change(function() {
+        if ($(this).val() === 'metric') {
+            $('#height-unit-label').text('cm');
+            $('#weight-unit-label').text('kg');
+
+            // Convert values to metric units
+            $('#height').val(parseFloat($('#height').val()) * 2.54);
+            $('#weight').val(parseFloat($('#weight').val()) * 0.453592);
+        } else {
+            $('#height-unit-label').text('in');
+            $('#weight-unit-label').text('lbs');
+
+            // Convert values to imperial units
+            $('#height').val(parseFloat($('#height').val()) / 2.54);
+            $('#weight').val(parseFloat($('#weight').val()) / 0.453592);
+        }
+    });    
+    $('#height, #weight').on('input', function() {
+        if (isValidNumber($('#height').val()) && isValidNumber($('#weight').val())) {
+            calculateBSA();
+        } else {
+            // Clear results if inputs are invalid
+            $('#bsa-haycock, #bsa-mosteller, #bsa-dubois, #bmi, #ideal-bsa', '#wt-bmi25').text('');
+            $('.ideal-bsa').hide();
+        }
+    });
+        $('#calculate').click(function() {
+        calculateBSA();
+    });
+});
+        
+    </script>
+</body>
+</html>

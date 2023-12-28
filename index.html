@@ -25,7 +25,7 @@
             padding: 30px;
         }
         /* Adjustments for smaller screens */
-        @media screen and (max-width: 500px) {
+        @media screen and (max-width: 800px) {
             .container {
                 max-width: 90%;
             }
@@ -93,15 +93,6 @@
             </select>
         </div>
         <div>
-            <label for="bsa-equation">Select BSA Equation:</label>
-            <select id="bsa-equation">
-                <option value="haycock">Haycock</option>
-                <option value="mosteller">Mosteller</option>
-                <option value="dubois">DuBois</option>
-
-            </select>
-        </div>
-        <div>
             <label for="height">Height (<span id="height-unit-label">cm</span>):</label>
             <input type="number" id="height" name="height" required>
         </div>
@@ -109,27 +100,38 @@
             <label for="weight">Weight (<span id="weight-unit-label">kg</span>):</label>
             <input type="number" id="weight" name="weight" required>
         </div>
+        <div>
+            <label for="bsa-equation">Select BSA Equation:</label>
+            <select id="bsa-equation">
+                <option value="boyd">Boyd</option>
+                <option value="dreyer">Dreyer (weight only)</option>
+                <option value="dubois">DuBois</option>
+                <option value="gehan">Gehan</option>
+                <option value="haycock" selected="selected">Haycock</option>
+                <option value="mosteller">Mosteller</option>
+
+            </select>
+        </div>
 
         <div>
             <button type="button" id="calculate">Calculate</button>
         </div>
 
     <div id="results" class="result">
-        <h2>Results</h2>
-        <div id="bsa-haycock"></div>
-        <div id="bsa-mosteller"></div>
-        <div id="bsa-dubois"></div>
-        <div id="bmi"></div>
-        <div id="ideal-bsa" class="ideal-bsa"></div>
-        <div id="wt-bmi25"></div>
+        <h2 id="bsa"></h2>
+        <h3 id="bmi"></h3>
+        <p id="bmi-normal">This person has a BMI that is normal. There is no need to "idealize" BSA.</p>
+        <p id="bmi-abnormal">This person has a BMI that is associated with being <span id="bmi-category"></span>. If this person had a BMI of 25, the weight would be <span id="wt-bmi25"></span>. Recalculating the BSA using this weight will give us the "ideal BSA." </p>
+        <h2 id="ideal-bsa" class="ideal-bsa"></h2>
     </div>
     </div>
 
     <script>
 $(document).ready(function() {
-    $('.ideal-bsa').hide();
-    function calculateBSA() {
-        var height, weight, weightUnit;
+    //hide the results
+    $('#bmi-normal, #bmi-abnormal, #ideal-bsa').hide();
+    function calculate() {
+        var height, weight, BMI, BSA, idealBSA, idealWeight, weightUnit;
         var bsaEquation = $('#bsa-equation').val();
 
         if ($('#unit-system').val() === 'metric') {
@@ -143,10 +145,10 @@ $(document).ready(function() {
         }
 
         // Calculate BMI
-        var bmi = weight / ((height / 100) * (height / 100));
-        $('#bmi').text('BMI: ' + bmi.toFixed(2));
-        $('.ideal-bsa').show();
-        if (bmi < 25) {
+        BMI = weight / ((height / 100) * (height / 100));
+        $('#bmi').text('BMI: ' + BMI.toFixed(2));
+
+        if (BMI < 25) {
             $('#ideal-bsa').text('BSA: '+bsaMosteller.toFixed(2) + ' cm² ');
             $('#wt-bmi25').text('Since the BMI is not greater than 25, the BSA is already "idealized"');
         } else {
@@ -165,6 +167,26 @@ $(document).ready(function() {
             $('#wt-bmi25').text('the weight at this ideal BSA is: ' + displayCorrectedWt.toFixed(1) + ' '+ weightUnit  );
         }
 
+    }
+
+    function calcBSA(ht, wt, method){
+        switch(method){ 
+            case "dubois":
+                return 0.007184 * Math.pow(ht, 0.725) * Math.pow(wt, 0.425);
+            case "haycock":
+                return 0.024265 * Math.pow(ht, 0.3964) * Math.pow(wt, 0.5378);
+            case "gehan":
+                return 0.0235 * Math.pow(ht, 0.42246) * Math.pow(wt, 0.51456);
+            case "mosteller":
+                return Math.sqrt((ht * wt) / 3600);
+            case "boyd":
+                wt = wt * 1000;
+                var exponent = 0.7285 - 0.0188 * (Math.LOG10E * Math.log(wt)); //necessary to get the Log base 10 of (wt)
+                return 0.0003207 * Math.pow(ht, 0.3) * Math.pow(wt, exponent);
+            case "dreyer":
+                return 0.1 * Math.pow(wt, (2 / 3));
+            default:
+                return 0.024265 * Math.pow(ht, 0.3964) * Math.pow(wt, 0.5378);// returns Haycock in the event an unfamiliar method is passed in        }
     }
 
     function isValidNumber(value) {
@@ -188,9 +210,9 @@ $(document).ready(function() {
             $('#weight').val(parseFloat($('#weight').val()) / 0.453592);
         }
     });    
-    $('#height, #weight').on('input', function() {
+    $('#height, #weight, #bsaEquation').on('input', function() {
         if (isValidNumber($('#height').val()) && isValidNumber($('#weight').val())) {
-            calculateBSA();
+            calculate();
         } else {
             // Clear results if inputs are invalid
             $('#bsa-haycock, #bsa-mosteller, #bsa-dubois, #bmi, #ideal-bsa', '#wt-bmi25').text('');
@@ -198,7 +220,7 @@ $(document).ready(function() {
         }
     });
         $('#calculate').click(function() {
-        calculateBSA();
+        calculate();
     });
 });
         

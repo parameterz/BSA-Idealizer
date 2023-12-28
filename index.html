@@ -150,10 +150,12 @@ $(document).ready(function() {
         //console.log(bsaEquation);
         $('#bsa').text('BSA: ' + calcBSA(height, weight, bsaEquation).toFixed(2) + ' m²');
 
+        //consider doing something for underweight (BMI<18.5)
+        //
         if (BMI < 25) {
             $('.normal').show();
             $('.ideal').hide();
-        } else {
+        } else { //BMI is greater than 25
             $('.normal').hide();
             $('.ideal').show();
             //classify the level of overweight

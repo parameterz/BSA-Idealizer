@@ -84,7 +84,8 @@
 <body>
     <body>
         <div class="container">
-        <h1>Ideal BSA Calculator</h1>
+        <h1>BSA Idealizer</h1>
+        <p>Calculate BSA and BMI and, in cases of abnormal weight, calculates the "ideal" BSA associated with a "normal" BMI</p>
         <div>
             <label for="unit-system">Select Unit System:</label>
             <select id="unit-system">
@@ -104,10 +105,11 @@
             <label for="bsa-equation">Select BSA Equation:</label>
             <select id="bsa-equation">
                 <option value="boyd">Boyd</option>
-                <option value="dreyer">Dreyer (weight only)</option>
+                <option value="dreyer">Dreyer</option>
                 <option value="dubois">DuBois</option>
                 <option value="gehan">Gehan</option>
                 <option value="haycock" selected="selected">Haycock</option>
+                <option value="livingston">Livingston & Lee</option>
                 <option value="mosteller">Mosteller</option>
             </select>
         </div>
@@ -120,7 +122,8 @@
         <h2 id="bsa"></h2>
         <h3 id="bmi"></h3>
         <p id="bmi-normal" class="normal">This person is not overweight according to the BMI. There is no need to "idealize" BSA.</p>
-        <p id="bmi-abnormal" class="ideal">This person has a BMI that is associated with being <span id="bmi-category"></span>. If this person had a BMI of 25, the weight would be <span id="wt-bmi25"></span>. Recalculating the BSA using this weight will give us the "ideal BSA." </p>
+        <p id="bmi-abnormal" class="ideal">This BMI is associated with <span id="bmi-category"></span>. If this person had a BMI of <span id="bmiLimit"></span>, the weight would be 
+            <span id="idealWeight"></span>. Recalculating the BSA using this weight will give us the "ideal BSA." </p>
         <h2 id="ideal-bsa" class="ideal"></h2>
     </div>
     </div>
@@ -130,7 +133,7 @@ $(document).ready(function() {
     //hide the results
     $('.normal, .ideal').hide();
     function calculate() {
-        var height, weight, BMI, BSA, idealBSA, idealWeight, weightUnit;
+        var height, weight, BMI, BSA, idealBSA, idealWeight, weightUnit, bmiClass, displayCorrectedWt;
         var bsaEquation = $('#bsa-equation').val();
 
         if ($('#unit-system').val() === 'metric') {
@@ -145,39 +148,53 @@ $(document).ready(function() {
 
         // Calculate BMI
         BMI = weight / ((height / 100) * (height / 100));
-        $('#bmi').text('BMI: ' + BMI.toFixed(2));
+        $('#bsa').text('BSA: ' + calcBSA(height, weight, bsaEquation).toFixed(2) + ' m²');
+        $('#bmi').text('BMI: ' + BMI.toFixed(2) + ' kg/m²');
         //calculate the BSA
         //console.log(bsaEquation);
         $('#bsa').text('BSA: ' + calcBSA(height, weight, bsaEquation).toFixed(2) + ' m²');
 
-        //consider doing something for underweight (BMI<18.5)
-        //
-        if (BMI < 25) {
+        if (BMI < 18.5){ //underweight
+            $('.normal').hide();
+            $('.ideal').show();
+            bmiClass = 'underweight';
+            $('#bmi-category').text(bmiClass);
+            $('#bmiLimit').text('18.5');
+            var wtBmi18 = (18.5 * ((height / 100) * (height / 100)));
+            if (weightUnit === 'lbs'){
+                displayCorrectedWt = wtBmi18 * 2.205;
+            } else {
+                displayCorrectedWt = wtBmi18;
+            }
+            $('#idealWeight').text( displayCorrectedWt.toFixed(1) + ' '+ weightUnit  );
+            //calcualte the ideal BSA
+            $('#ideal-bsa').text('Ideal BSA: ' + calcBSA(height, wtBmi18, bsaEquation).toFixed(2) +' m²');
+        }
+        else if (BMI < 25) {
             $('.normal').show();
             $('.ideal').hide();
         } else { //BMI is greater than 25
             $('.normal').hide();
             $('.ideal').show();
             //classify the level of overweight
-            var bmiClass;
             if(BMI<30){
                 bmiClass = 'overweight';
             }else if(BMI < 40){
-                bmiClass = 'obese';
+                bmiClass = 'obesity';
             } else {
-                bmiClass = 'morbidly obese';
+                bmiClass = 'morbid obesity';
             }
             $('#bmi-category').text(bmiClass);
+            $('#bmiLimit').text('25');
             //calculate the weight at BMI 25
             var wtBmi25 = (25 * ((height / 100) * (height / 100)));
 
-            var displayCorrectedWt;
             if (weightUnit === 'lbs'){
                 displayCorrectedWt = wtBmi25 * 2.205;
             } else {
                 displayCorrectedWt = wtBmi25;
             }
-            $('#wt-bmi25').text( displayCorrectedWt.toFixed(1) + ' '+ weightUnit  );
+            $('#idealWeight').text( displayCorrectedWt.toFixed(1) + ' '+ weightUnit  );
             //calcualte the ideal BSA
             $('#ideal-bsa').text('Ideal BSA: ' + calcBSA(height, wtBmi25, bsaEquation).toFixed(2) +' m²');
         }
@@ -200,6 +217,9 @@ $(document).ready(function() {
                 return 0.0003207 * Math.pow(ht, 0.3) * Math.pow(wt, exponent);
             case "dreyer":
                 return 0.1 * Math.pow(wt, (2 / 3));
+            case 'livingston':
+                //Body surface area prediction in normal-weight and obese patients 2001
+                return 0.1173 * Math.pow(wt, 0.6466);
             default:
                 return 0.024265 * Math.pow(ht, 0.3964) * Math.pow(wt, 0.5378);// returns Haycock in the event an unfamiliar method is passed in        
             }
@@ -225,6 +245,7 @@ $(document).ready(function() {
             $('#height').val(parseFloat($('#height').val()) / 2.54);
             $('#weight').val(parseFloat($('#weight').val()) / 0.453592);
         }
+        calculate();
     });    
     // Function to recalculate when BSA equation changes
     $('#bsa-equation').change(function() {

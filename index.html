@@ -121,9 +121,9 @@
     <div id="results" class="result">
         <h2 id="bsa"></h2>
         <h3 id="bmi"></h3>
-        <p id="bmi-normal" class="normal">This person is not overweight according to the BMI. There is no need to "idealize" BSA.</p>
+        <p id="bmi-normal" class="normal">No need to "idealize" BSA! (BMI is within normal range)</p>
         <p id="bmi-abnormal" class="ideal">This BMI is associated with <span id="bmi-category"></span>. If this person had a BMI of <span id="bmiLimit"></span>, the weight would be 
-            <span id="idealWeight"></span>. Recalculating the BSA using this weight will give us the "ideal BSA." </p>
+            <span id="idealWeight"></span>. Recalculating the BSA using this weight will give us the "ideal BSA":</p>
         <h2 id="ideal-bsa" class="ideal"></h2>
     </div>
     </div>
@@ -245,7 +245,7 @@ $(document).ready(function() {
             $('#height').val(parseFloat($('#height').val()) / 2.54);
             $('#weight').val(parseFloat($('#weight').val()) / 0.453592);
         }
-        calculate();
+        $('#bsa-equation').change();
     });    
     // Function to recalculate when BSA equation changes
     $('#bsa-equation').change(function() {

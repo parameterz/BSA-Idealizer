@@ -30,6 +30,13 @@
             list-style: none;
         }
 
+        .equation-image {
+            max-width: 100%;
+            height: auto;
+            display: block; /* Ensures image alignment behaves as expected */
+            margin: 0 auto; /* Centers the image within its container */
+        }
+
         /* Adjustments for smaller screens */
         @media screen and (max-width: 800px) {
             .container {
@@ -136,7 +143,8 @@
         <h3>About</h3>
         <p>Most echocardiographic (also MRI and CT!) normal values are routinely adjusted for body size. Body surface area (BSA) is the most commonly used parameter with which we do this.
             Yet, heart size might not always scale with BSA in cases of abnormal weight.
-            A strategy proposed for correcting body size in these abnormal weight conditions is to adjust the weight to that of an equivalent "normal" body mass index (BMI). 
+            A strategy proposed for correcting body size in these abnormal weight conditions is to adjust the weight to that of an equivalent "normal" body mass index (BMI), like this: 
+            <img alt="Mathematical Equation" class="equation-image" src="img\BMI-math.png">
             What this calculator does:
             <ol>
                 <li>Calculate the BSA</li>
@@ -145,7 +153,6 @@
                     <ul>
                         <li>Calculate the "idealized" weight at that threshold</li>
                         <li>Re-calculate the BSA using the "idealized" weight, giving the "idealized" BSA</li>
-                        <li><img src="img\BMI-math.png"></li>
                     </ul>
                 </li>
                 
@@ -177,6 +184,7 @@ $(document).ready(function() {
         var height, weight, BMI, BSA, idealBSA, idealWeight, weightUnit, bmiClass, displayCorrectedWt;
         var bsaEquation = $('#bsa-equation').val();
 
+        //allow for changing the height & weight units
         if ($('#unit-system').val() === 'metric') {
             height = parseFloat($('#height').val());
             weight = parseFloat($('#weight').val());
@@ -307,7 +315,12 @@ $(document).ready(function() {
         }
     });
         $('#calculate').click(function() {
-        calculate();
+            if (isValidNumber($('#height').val()) && isValidNumber($('#weight').val())) {
+            calculate();
+        } else {
+            // Clear results if inputs are invalid
+            $('#bsa-haycock, #bsa-mosteller, #bsa-dubois, #bmi, #ideal-bsa, #wt-bmi25').text('');
+        }
     });
 });
         

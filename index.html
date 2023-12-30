@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Ideal BSA Calculator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="calculates the idealized BSA from height and weight inputs">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
@@ -24,6 +25,11 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 30px;
         }
+
+        ul.citation {
+            list-style: none;
+        }
+
         /* Adjustments for smaller screens */
         @media screen and (max-width: 800px) {
             .container {
@@ -85,7 +91,7 @@
     <body>
         <div class="container">
         <h1>BSA Idealizer</h1>
-        <p>Calculate BSA and BMI and, in cases of abnormal weight, calculates the "ideal" BSA associated with a "normal" BMI</p>
+        <p>Calculate BSA and BMI and, in cases of abnormal weight, calculates the "idealized" BSA associated with a "normal" BMI.</p>
         <div>
             <label for="unit-system">Select Unit System:</label>
             <select id="unit-system">
@@ -123,8 +129,42 @@
         <h3 id="bmi"></h3>
         <p id="bmi-normal" class="normal">No need to "idealize" BSA! (BMI is within normal range)</p>
         <p id="bmi-abnormal" class="ideal">This BMI is associated with <span id="bmi-category"></span>. If this person had a BMI of <span id="bmiLimit"></span>, the weight would be 
-            <span id="idealWeight"></span>. Recalculating the BSA using this weight will give us the "ideal BSA":</p>
+            <span id="idealWeight"></span>. Recalculating the BSA using this weight will give us the "idealized BSA":</p>
         <h2 id="ideal-bsa" class="ideal"></h2>
+    </div>
+    <div id="about">
+        <h3>About</h3>
+        <p>Most echocardiographic (also MRI and CT!) normal values are routinely adjusted for body size. Body surface area (BSA) is the most commonly used parameter with which we do this.
+            Yet, heart size might not always scale with BSA in cases of abnormal weight.
+            A strategy proposed for correcting body size in these abnormal weight conditions is to adjust the weight to that of an equivalent "normal" body mass index (BMI). 
+            What this calculator does:
+            <ol>
+                <li>Calculate the BSA</li>
+                <li>Calcualte the BMI (weight (kg) &div; height (meters)<sup>2</sup>) </li>
+                <li>If the BMI is abnormal (less than 18.5 or greater than 25) 
+                    <ul>
+                        <li>Calculate the "idealized" weight at that threshold</li>
+                        <li>Re-calculate the BSA using the "idealized" weight, giving the "idealized" BSA</li>
+                    </ul>
+                </li>
+                
+            </ol>
+        </p>
+        <p>To read more about this strategy of normalizing BSA, please read </p>
+            <ul class= "citation">
+                <li><cite>Normal Values of Left Atrial Size and Function and the Impact of Age: Results of the World Alliance Societies of Echocardiography Study.</cite></li>
+                <li>Singh A, Carvalho Singulane C, Miyoshi T. et al.</li>
+                <li><a href="https://onlinejase.com/article/S0894-7317(21)00650-7/fulltext#supplementaryMaterial">J Am Soc Echocardiogr. 2022 Feb;35(2):154-164.</a></li>
+            </ul>
+        
+        <p>To learn more about BSA equations, please read </p>
+        <ul class= "citation">
+            <li><cite>Body surface area formulae: an alarming ambiguity.</cite></li>
+            <li>Redlarski G, Palkowski A, Krawczuk M.</li>
+            <li><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4914842/">Sci Rep. 2016 Jun 21;6:27966.</a></li>
+        </ul>
+            <p>To learn more about the BMI thresholds used here, please visit the CDC page at <a href="https://www.cdc.gov/healthyweight/assessing/bmi/adult_bmi/index.html">https://www.cdc.gov/healthyweight/assessing/bmi/adult_bmi/index.html</a></p>
+
     </div>
     </div>
 
